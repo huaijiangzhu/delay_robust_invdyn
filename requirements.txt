@@ -1,3 +1,4 @@
+dotmap
 numpy
 scipy
 jupyter
