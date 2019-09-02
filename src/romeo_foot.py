@@ -104,7 +104,7 @@ class RomeoFoot(object):
         if (not self.in_contact) and self.step_t<=self.step_duration:
             self.step_t += dt
             
-    def land(self):
+    def land(self, precomputing=False):
         if not self.in_contact:
             pos = self.robot.position(self.invdyn.data(), self.robot.model().getJointId(self.name))
             pos.translation = self.motion_ref.pos()[:3]
@@ -112,10 +112,11 @@ class RomeoFoot(object):
             self.invdyn.addRigidContact(self.contact)
             self.in_contact = True
         
-    def lift(self):
+    def lift(self, precomputing=False):
         if self.in_contact:
             self.invdyn.removeRigidContact(self.contact.name, 0)
-            self.step_t = 0
+            if not precomputing:
+                self.step_t = 0
             self.in_contact = False
 
     def pos(self, t, q, v):
