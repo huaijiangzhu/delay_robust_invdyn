@@ -1,9 +1,6 @@
-# data and plot
-data/
+# plots
 *.png
 *.eps
-*.npy
-*.pkl
 
 # mujoco 
 mjkey.txt
