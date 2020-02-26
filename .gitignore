@@ -2,6 +2,10 @@
 *.png
 *.eps
 
+# experimental data
+*.pkl
+*.npy
+
 # mujoco 
 mjkey.txt
 MUJOCO_LOG.TXT
