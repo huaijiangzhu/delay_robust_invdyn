@@ -46,7 +46,7 @@ BMODE = p.DIRECT
 LOGGING = False
 LOCAL = True
 
-STEP_DURATION = 100 # 800
+STEP_DURATION = 800
 N_STEPS = 6
 N_SIMULATION = N_STEPS * STEP_DURATION
 DOUBLE_SUPPORT_DURATION = 5
@@ -179,15 +179,15 @@ left_foot.add_foot_steps(left_foot_steps)
 right_foot.add_foot_steps(right_foot_steps)
 
 ## move to the initial configuration
-for i in range(100):
+for i in range(2000):
 
+    print("move to initial config",i)
     sampleCom = trajCom.computeNext()
     comTask.setReference(sampleCom)
     samplePosture = trajPosture.computeNext()
     postureTask.setReference(samplePosture)
     HQPData = invdyn.computeProblemData(t, q, v)
 
-    print("solve tsid ",i)
     sol = solver.solve(HQPData)
     tau = invdyn.getActuatorForces(sol)
 
@@ -198,7 +198,7 @@ for i in range(100):
     t += dt
 
 ## FIXME: gives index error
-#Com[:,0,2] = robot.com(invdyn.data())[2, 0]
+Com[:,0,2] = robot.com(invdyn.data())[2]
 
 left_foot.add_motion_task(kp=kp_foot_motion, kd=kd_foot_motion, w=w_foot_motion)
 right_foot.add_motion_task(kp=kp_foot_motion, kd=kd_foot_motion, w=w_foot_motion)
@@ -333,7 +333,6 @@ for i in range(N_SIMULATION):
         tau = invdyn.getActuatorForces(sol)
         dv = invdyn.getAccelerations(sol)
     else:
-        solver.compute_slack(HQPData, delayed_sol)
         sol = delayed_sol
         tau = delayed_data.tau_fullqp
         dv = delayed_data.dv_fullqp
@@ -392,7 +391,8 @@ fig, ax = plt.subplots(1, 3, figsize=(30, 6))
 time = np.arange(0.0, N_SIMULATION*dt, dt)
 axes = ['x', 'y', 'z']
 for i in range(3):
-    err = 100*np.abs([data.com.pos[i,0]-data.com.pos_ref[i,0] for data in LOG])
+    # err = 100*np.abs([data.com.pos[i,0]-data.com.pos_ref[i,0] for data in LOG])
+    err = 100*np.abs([data.com.pos[i]-data.com.pos_ref[i] for data in LOG])
     ax[0].plot(time, err, lw=4, label='CoM '+axes[i])
 
 ax[0].grid()
@@ -401,7 +401,8 @@ ax[0].set_ylabel('CoM tracking error' + ' [cm]' )
 _ = ax[0].legend(loc='upper right', ncol=1, fancybox=True, shadow=True)
 ax[0].set_ylim([0, 10])
 
-slack = [data.slack[1, 0] for data in LOG]
+#slack = [data.slack[1, 0] for data in LOG]
+slack = [data.slack[1] for data in LOG]
 ax[1].plot(time, slack, lw=1)
 ax[1].grid()
 ax[1].set_xlabel('Time [s]')
@@ -438,6 +439,7 @@ if LOCAL:
     file_name += '_local'
 
 plot_path = parentdir + '/data/plots/'
+print(plot_path)
 fig.savefig(plot_path + file_name + '.png', bbox_inches='tight')
 
 print np.mean([1000*data.fullqp_time for data in LOG])
