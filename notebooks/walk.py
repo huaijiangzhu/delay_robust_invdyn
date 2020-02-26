@@ -46,7 +46,7 @@ BMODE = p.DIRECT
 LOGGING = False
 LOCAL = True
 
-STEP_DURATION = 800
+STEP_DURATION = 100 # 800
 N_STEPS = 6
 N_SIMULATION = N_STEPS * STEP_DURATION
 DOUBLE_SUPPORT_DURATION = 5
@@ -179,20 +179,15 @@ left_foot.add_foot_steps(left_foot_steps)
 right_foot.add_foot_steps(right_foot_steps)
 
 ## move to the initial configuration
-for i in range(2000):
+for i in range(100):
 
     sampleCom = trajCom.computeNext()
     comTask.setReference(sampleCom)
     samplePosture = trajPosture.computeNext()
     postureTask.setReference(samplePosture)
     HQPData = invdyn.computeProblemData(t, q, v)
-    if i == 0:
-    	solver.initializeSolver(HQPData)
-    else:
-	solver.reinitializeSolver()
 
     print("solve tsid ",i)
-    HQPData.print_all()
     sol = solver.solve(HQPData)
     tau = invdyn.getActuatorForces(sol)
 
@@ -202,7 +197,8 @@ for i in range(2000):
     q, v = pbwrapper.get_state()
     t += dt
 
-Com[:,0,2] = robot.com(invdyn.data())[2, 0]
+## FIXME: gives index error
+#Com[:,0,2] = robot.com(invdyn.data())[2, 0]
 
 left_foot.add_motion_task(kp=kp_foot_motion, kd=kd_foot_motion, w=w_foot_motion)
 right_foot.add_motion_task(kp=kp_foot_motion, kd=kd_foot_motion, w=w_foot_motion)
@@ -226,6 +222,7 @@ step = 0
 
 for i in range(N_SIMULATION):
 
+    print("run simulation ",i," of ",N_SIMULATION)
     data = DotMap()
     LOG.append(data)
 
@@ -286,9 +283,10 @@ for i in range(N_SIMULATION):
     data.noise_q = noise_q
     data.noise_v = noise_v
 
-    if(sol.status!=0):
-        print ("QP problem could not be solved! Error code:", sol.status)
-        break
+    # FIXME: check slacks for infeasibility of constraints
+    #if(sol.status!=0):
+    #    print ("QP problem could not be solved! Error code:", sol.status)
+    #    break
 
     SOL.append(sol_fullqp)
     tau = invdyn.getActuatorForces(sol_fullqp)
@@ -329,7 +327,8 @@ for i in range(N_SIMULATION):
     if LOCAL:
         local_start = time.time()
         HQPData = invdyn.computeProblemData(t, q + noise_q, v + noise_v)
-        sol = solver.solve_local(HQPData, delayed_sol)
+        # resolve problem with the previous decomposition but changed right hand side
+        sol = solver.resolve(HQPData)
         data.local_time = time.time() - local_start
         tau = invdyn.getActuatorForces(sol)
         dv = invdyn.getAccelerations(sol)
@@ -354,13 +353,14 @@ for i in range(N_SIMULATION):
     data.right_foot.pos = right_foot.pos(t,q,v).translation
     data.right_foot.pos_ref = right_foot.motion_ref.pos()[:3]
 
-    # pinocchip
-    v_mean = v + 0.5*dt*dv
-    v += dt*dv
-    q = se3.integrate(robot.model(), q, dt*v_mean)
-    pbwrapper.reset_state(q, v)
-    p.stepSimulation()
-    t += dt
+    # # FIXME: wrong shape;
+    # # pinocchio
+    # v_mean = v + 0.5*dt*dv
+    # v += dt*dv
+    # q = se3.integrate(robot.model(), q, dt*v_mean)
+    # pbwrapper.reset_state(q, v)
+    # p.stepSimulation()
+    # t += dt
 
 p.disconnect()
 
