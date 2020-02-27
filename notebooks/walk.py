@@ -169,20 +169,23 @@ left_foot.add_foot_steps(left_foot_steps)
 right_foot.add_foot_steps(right_foot_steps)
 
 ## move to the initial configuration
-for i in range(2000):
+for i in range(20000):
 
     sampleCom = trajCom.computeNext()
     comTask.setReference(sampleCom)
     samplePosture = trajPosture.computeNext()
     postureTask.setReference(samplePosture)
     HQPData = invdyn.computeProblemData(t, q, v)
+    HQPData.print_all()
 
     sol = solver.solve(HQPData)
     tau = invdyn.getActuatorForces(sol)
-    print(tau)
+    print("tau: ",tau)
 
     # bullet
     pbwrapper.send_joint_command(tau)
     p.stepSimulation()
     q, v = pbwrapper.get_state()
     t += dt
+
+    print(robot.com(invdyn.data()))
