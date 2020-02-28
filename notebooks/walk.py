@@ -176,9 +176,9 @@ for i in range(2000):
     samplePosture = trajPosture.computeNext()
     postureTask.setReference(samplePosture)
     HQPData = invdyn.computeProblemData(t, q, v)
-    HQPData.print_all()
+    # HQPData.print_all()
 
-    print("iter ",i," ",robot.com(invdyn.data()))
+    # print("iter ",i," ",robot.com(invdyn.data()))
     sol = solver.solve(HQPData)
     tau = invdyn.getActuatorForces(sol)
 
@@ -215,7 +215,7 @@ success = True
 
 for i in range(N_SIMULATION):
 
-    print("iter ",i," ",robot.com(invdyn.data()))
+    # print("iter ",i," ",robot.com(invdyn.data()))
     data = DotMap()
     LOG.append(data)
 
@@ -387,8 +387,6 @@ for i in range(N_SIMULATION):
     pbwrapper.reset_state(q, v)
     p.stepSimulation()
     t += dt
-    if success == False:
-        break
 
 
 p.disconnect()
