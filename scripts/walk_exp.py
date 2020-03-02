@@ -49,7 +49,7 @@ DOUBLE_SUPPORT_DURATION = 5
 DELAY = 4
 NS3 = True
 SCENARIO = 'building'
-N_EXPS = 6
+N_EXPS = 100
 
 DELAY_START = 0
 ONBOARD_WINDOW = 50
@@ -65,6 +65,7 @@ ONBOARD_FREQ = 5
 for trial_id in range(N_EXPS):
     # compute delayed indices
     delayed_ids = []
+    print "trial id " + str(trial_id)
 
     if NS3:
         ns3_path = parentdir + '/data/ns3/' + SCENARIO + '/delayed_ids/'

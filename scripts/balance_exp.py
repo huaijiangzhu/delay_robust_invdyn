@@ -40,7 +40,7 @@ N_SIMULATION = 5000
 
 DELAY = 1
 NS3 = True
-SCENARIO = 'factory'
+SCENARIO = 'building'
 N_EXPS = 100
 
 DELAY_START = 0
@@ -50,7 +50,7 @@ IMPACT_DURATION = 200
 IMPACT_FORCE = [100, 0, 0]
 
 for trial_id in range(N_EXPS):
-    print ("Trial ", trial_id)
+    print "Trial " + str(trial_id)
     # compute delayed indices
     delayed_ids = []
 
@@ -231,10 +231,10 @@ for trial_id in range(N_EXPS):
         tau = invdyn.getActuatorForces(sol_fullqp)
         dv = invdyn.getAccelerations(sol_fullqp)
 
-        if(sol_fullqp.status!=0):
+        if (sol_fullqp.status!=0):
             print "QP problem could not be solved! Error code:", sol.status
             break 
-        if(np.linalg.norm(dv[:6]) >= 1e3):
+        if (np.linalg.norm(dv[:6]) >= 1e2):
             print "Slipped and fell."
             success = False
             break  
