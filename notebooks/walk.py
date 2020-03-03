@@ -171,6 +171,7 @@ right_foot.add_foot_steps(right_foot_steps)
 ## move to the initial configuration
 for i in range(2000):
 
+    #print("iter ",i," ",robot.com(invdyn.data()))
     sampleCom = trajCom.computeNext()
     comTask.setReference(sampleCom)
     samplePosture = trajPosture.computeNext()
@@ -178,7 +179,6 @@ for i in range(2000):
     HQPData = invdyn.computeProblemData(t, q, v)
     # HQPData.print_all()
 
-    # print("iter ",i," ",robot.com(invdyn.data()))
     sol = solver.solve(HQPData)
     tau = invdyn.getActuatorForces(sol)
 
