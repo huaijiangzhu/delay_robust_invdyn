@@ -1,4 +1,6 @@
 # plots
+*.DS_Store
+# plots
 *.png
 *.eps
 
